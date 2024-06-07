@@ -1,5 +1,5 @@
 from flask import Flask
-from src.InspectionHandler import InspectionHandler
+from InspectionHandler import InspectionHandler
 import threading
 from app_webserver import webserver_bp
 

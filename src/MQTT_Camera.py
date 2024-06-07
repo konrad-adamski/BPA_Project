@@ -46,6 +46,7 @@ class MQTTClient:
         if msg.topic == self.response_topic:
             try:
                 self.response_payload = json.loads(msg.payload.decode())
+                self.logger.info(f"Received: {self.response_payload}")
             except json.JSONDecodeError:
                 print("Error decoding JSON")
             self.message_received.set()

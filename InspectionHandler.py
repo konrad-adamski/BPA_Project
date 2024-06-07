@@ -21,10 +21,9 @@ class InspectionHandler:
         self.opcua_subscriber.disconnect()
         self.mqtt_client.disconnect()
 
-    def get_inspection_response(self, inspection_plan):
+    def get_inspection_response(self, inspection_plan, logger):
         camera_response = self.mqtt_client.request_response_cv(message="Triggering Camera", timeout=2)
-        print("Kamera Informationen:")
-        print(json.dumps(camera_response, indent=4))
+        logger.info(f"CameraInspection response: {camera_response}")
 
         # TODO: Verarbeitung
         inspection_response = camera_response

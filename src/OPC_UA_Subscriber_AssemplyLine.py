@@ -29,11 +29,12 @@ class OPC_UA_Subscriber:
         self.latest_auto_id = None
         self.client = Client(self.opcua_url)
         self.sub = None
-        self.handler = self.SubHandler(self)
+        self.handler = self.SubHandler(self, self.logger)
 
     class SubHandler:
-        def __init__(self, outer):
+        def __init__(self, outer, logger):
             self.outer = outer
+            self.logger = logger
             self.callback = None
 
         def datachange_notification(self, node, val, data):
@@ -46,15 +47,16 @@ class OPC_UA_Subscriber:
                 match = re.search(r'ANT.*', element)
                 if match:
                     rfid_name = match.group()
-                    self.outer.logger.info(f"RFID: {rfid_name}")
+                    self.logger.info(f"RFID: {rfid_name}")
                     self.outer.latest_auto_id = get_auto_id(rfid_name)
                     # print(f"Auto ID: {self.outer.latest_auto_id}")
                     inspection_plan = self.outer.ass_manager.get_inspection_plan(auto_id=self.outer.latest_auto_id)
 
                     # Aufrufen der Callback-Funktion, wenn sie existiert
                     if self.callback:
-                        inspection_response = self.callback(inspection_plan)
-                        print("Inspection Response: ", inspection_response)
+                        inspection_response = self.callback(inspection_plan, self.logger)
+                        #self.logger.info(f"Camera Inspection: {inspection_response}")
+                        #print("Inspection Response: ", inspection_response)
                 else:
                     self.outer.latest_auto_id = "-1"
 
