@@ -7,9 +7,10 @@ from src.utils.Logger import SingletonLogger
 
 
 class InspectionHandler:
-    def __init__(self):
+    def __init__(self, is_simulation=True):
         self.logger = SingletonLogger()
-        self.opcua_subscriber = OPC_UA_Subscriber(self.logger)
+        self.is_simulation = is_simulation
+        self.opcua_subscriber = OPC_UA_Subscriber(self.logger, self.is_simulation)
         self.mqtt_client = MQTTClient(self.logger)
 
     def connect(self):
