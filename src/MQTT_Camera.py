@@ -4,16 +4,18 @@ from paho.mqtt.client import MQTTMessage
 import threading
 
 from config import settings
+from src.utils.Logger import SingletonLogger
 
 broker_address = settings.mqtt_url
 port = int(settings.mqtt_port)
 request_topic = "bpa24/cv/request"
 response_topic = "bpa24/cv/result"
 
+logger = SingletonLogger()
+
 
 class MQTTClient:
-    def __init__(self, logger, broker_address_in=broker_address, port_in=port):
-        self.logger = logger
+    def __init__(self, broker_address_in=broker_address, port_in=port):
         self.client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2)
         self.broker_address = broker_address_in
         self.port = port_in
@@ -32,9 +34,9 @@ class MQTTClient:
             client.subscribe(self.response_topic)
             self.is_connected = True
             self.connection_established.set()
-            self.logger.info("Connected and subscribed to " + self.response_topic)
+            logger.info("Connected and subscribed to " + self.response_topic)
         else:
-            self.logger.warning(f"Connection failed with reason code {reason_code}")
+            logger.warning(f"Connection failed with reason code {reason_code}")
 
     def on_disconnect(self, client, userdata, flags, reason_code, properties):
         self.is_connected = False
@@ -46,7 +48,7 @@ class MQTTClient:
         if msg.topic == self.response_topic:
             try:
                 self.response_payload = json.loads(msg.payload.decode())
-                self.logger.info(f"Received: {self.response_payload}")
+                logger.info(f"Inspection Data from MQTT: {self.response_payload}")
             except json.JSONDecodeError:
                 print("Error decoding JSON")
             self.message_received.set()

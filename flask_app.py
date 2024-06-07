@@ -1,10 +1,14 @@
-from flask import Blueprint, render_template
+from flask import Flask, render_template
 
-webserver_bp = Blueprint('webserver', __name__)
+app = Flask(__name__)
 
 
-@webserver_bp.route("/")
+@app.route('/')
 def view_logs():
     with open("app.log", "r") as file:
         logs = file.read()
     return render_template("logs.html", logs=logs)
+
+
+if __name__ == '__main__':
+    app.run()

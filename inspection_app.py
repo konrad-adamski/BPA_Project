@@ -1,17 +1,16 @@
 from functools import partial
-import json
-
 from src.MQTT_Camera import MQTTClient
 from src.OPC_UA_Subscriber_AssemplyLine import OPC_UA_Subscriber
 from src.utils.Logger import SingletonLogger
 
+logger = SingletonLogger()
+
 
 class InspectionHandler:
     def __init__(self, is_simulation=True):
-        self.logger = SingletonLogger()
         self.is_simulation = is_simulation
-        self.opcua_subscriber = OPC_UA_Subscriber(self.logger, self.is_simulation)
-        self.mqtt_client = MQTTClient(self.logger)
+        self.opcua_subscriber = OPC_UA_Subscriber(self.is_simulation)
+        self.mqtt_client = MQTTClient()
 
     def connect(self):
         self.mqtt_client.connect()
@@ -21,12 +20,13 @@ class InspectionHandler:
         self.opcua_subscriber.disconnect()
         self.mqtt_client.disconnect()
 
-    def get_inspection_response(self, inspection_plan, logger):
+    def get_inspection_response(self, inspection_plan):
         camera_response = self.mqtt_client.request_response_cv(message="Triggering Camera", timeout=2)
-        logger.info(f"CameraInspection response: {camera_response}")
 
         # TODO: Verarbeitung
         inspection_response = camera_response
+
+        logger.info(f"<Pseudo> inspection_response: {camera_response}")
 
         return inspection_response
 

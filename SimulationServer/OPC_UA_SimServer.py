@@ -22,11 +22,18 @@ auto_id.set_writable()
 
 
 def input_listener():
+    valid_ids = ["BMW_X7", "BMW_M4"]  # Liste der gültigen Auto-IDs
     while True:
-        new_auto_id = input("Enter new car ID: ")
-        rfid_string = get_rfid_forSimulation(new_auto_id)
-        auto_id.set_value(rfid_string)
-        print(rfid_string + " published to OPC UA server")
+        new_auto_id = input("Enter new car ID [BMW_X7, BMW_M4]:\n")
+        if new_auto_id in valid_ids:  # Überprüft, ob die Eingabe in der Liste der gültigen IDs ist
+            rfid_string = get_rfid_forSimulation(new_auto_id)
+            auto_id.set_value(rfid_string)
+            print(rfid_string + " published to OPC UA server")
+        else:
+            print("Invalid car ID. Please choose between 'BMW_X7' and 'BMW_M4'.")
+            rfid_string = get_rfid_forSimulation(new_auto_id)
+            auto_id.set_value(rfid_string)
+            print(rfid_string + " published to OPC UA server")
 
 
 if __name__ == '__main__':

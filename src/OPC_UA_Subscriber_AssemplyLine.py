@@ -6,6 +6,7 @@ from opcua import Client
 
 from config import settings
 from src.utils.AASManager import AASManager
+from src.utils.Logger import SingletonLogger
 from src.utils.util_functions import get_auto_id
 
 OPCUA_URL_MOCKUP = settings.opcua_url_mockup
@@ -14,27 +15,27 @@ OPCUA_URL = settings.opcua_url
 simulation_node = "2:RFID-Reader_Data"
 node_path = ["2:DeviceSet", "3:PLC_1", "3:DataBlocksGlobal", "3:GDB_OPC-UA", "3:RFID-Reader", "3:Data"]
 
+logger = SingletonLogger()
+
 
 class OPC_UA_Subscriber:
-    def __init__(self, logger, is_simulation=True):
-        self.logger = logger
+    def __init__(self, is_simulation=True):
         self.is_simulation = is_simulation
         if self.is_simulation:
             self.opcua_url = OPCUA_URL_MOCKUP
         else:
             self.opcua_url = OPCUA_URL
 
-        self.ass_manager = AASManager(self.logger)
+        self.ass_manager = AASManager()
         self.latest_auto_id_lock = threading.Lock()
         self.latest_auto_id = None
         self.client = Client(self.opcua_url)
         self.sub = None
-        self.handler = self.SubHandler(self, self.logger)
+        self.handler = self.SubHandler(self)
 
     class SubHandler:
-        def __init__(self, outer, logger):
+        def __init__(self, outer):
             self.outer = outer
-            self.logger = logger
             self.callback = None
 
         def datachange_notification(self, node, val, data):
@@ -47,14 +48,14 @@ class OPC_UA_Subscriber:
                 match = re.search(r'ANT.*', element)
                 if match:
                     rfid_name = match.group()
-                    self.logger.info(f"RFID: {rfid_name}")
+                    logger.info(f"RFID: {rfid_name}")
                     self.outer.latest_auto_id = get_auto_id(rfid_name)
                     # print(f"Auto ID: {self.outer.latest_auto_id}")
                     inspection_plan = self.outer.ass_manager.get_inspection_plan(auto_id=self.outer.latest_auto_id)
 
                     # Aufrufen der Callback-Funktion, wenn sie existiert
                     if self.callback:
-                        inspection_response = self.callback(inspection_plan, self.logger)
+                        inspection_response = self.callback(inspection_plan)
                         #self.logger.info(f"Camera Inspection: {inspection_response}")
                         #print("Inspection Response: ", inspection_response)
                 else:
@@ -66,7 +67,7 @@ class OPC_UA_Subscriber:
     def connect(self):
         try:
             self.client.connect()
-            self.logger.info("Connected to OPC UA server")
+            logger.info("Connected to OPC UA server")
             objects = self.client.get_objects_node()
             if self.is_simulation:
                 auto_id_obj = objects.get_child([simulation_node])
@@ -76,7 +77,7 @@ class OPC_UA_Subscriber:
             self.sub = self.client.create_subscription(100, self.handler)
             self.sub.subscribe_data_change(auto_id_node)
         except Exception as e:
-            self.logger.exception(f"Error connecting to OPC UA server, error: {e}")
+            logger.exception(f"Error connecting to OPC UA server, error: {e}")
             self.disconnect()
 
     def run(self):
@@ -84,10 +85,9 @@ class OPC_UA_Subscriber:
             while True:
                 time.sleep(1)
         except KeyboardInterrupt:
-            self.logger.info("Stopping OPC UA Subscriber.")
+            logger.info("Stopping OPC UA Subscriber.")
 
     def disconnect(self):
         if self.client:
             self.client.disconnect()
-            self.logger.info("Disconnected from OPC UA server")
-
+            logger.info("Disconnected from OPC UA server")

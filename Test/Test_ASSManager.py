@@ -1,11 +1,7 @@
 import json
-
 from src.utils.AASManager import AASManager
-from src.utils.Logger import SingletonLogger
 
-logger = SingletonLogger()
-
-ass_manager = AASManager(logger)
+ass_manager = AASManager()
 inspectionPlan = ass_manager.get_inspection_plan("BMW_M4")
 print(json.dumps(inspectionPlan, indent=4))
 
