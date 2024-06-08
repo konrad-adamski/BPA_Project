@@ -1,6 +1,6 @@
 import json
 import requests
-from config import settings
+from config.env_config import settings
 from src.utils.util_functions import encode_to_base64
 from requests_toolbelt.multipart.encoder import MultipartEncoder
 from src.utils.Logger import SingletonLogger

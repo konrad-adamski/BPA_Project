@@ -1,10 +1,9 @@
-import json
 import re
 import time
 import threading
 from opcua import Client
 
-from config import settings
+from config.env_config import settings
 from src.utils.AASManager import AASManager
 from src.utils.Logger import SingletonLogger
 from src.utils.util_functions import get_auto_id
@@ -56,8 +55,9 @@ class OPC_UA_Subscriber:
                     # Aufrufen der Callback-Funktion, wenn sie existiert
                     if self.callback:
                         inspection_response = self.callback(inspection_plan)
-                        #self.logger.info(f"Camera Inspection: {inspection_response}")
-                        #print("Inspection Response: ", inspection_response)
+                        self.outer.ass_manager.put_inspection_response(self.outer.latest_auto_id,
+                                                                       inspection_response)
+
                 else:
                     self.outer.latest_auto_id = "-1"
 

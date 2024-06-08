@@ -15,7 +15,6 @@ class Settings:
         self.mqtt_port = os.getenv("MQTT_PORT")
 
         self.main_path = os.path.dirname(os.path.abspath(__file__))
-        print(self.main_path)
 
 
 settings = Settings()

@@ -3,7 +3,7 @@ import paho.mqtt.client as mqtt
 from paho.mqtt.client import MQTTMessage
 import threading
 
-from config import settings
+from config.env_config import settings
 from src.utils.Logger import SingletonLogger
 
 broker_address = settings.mqtt_url

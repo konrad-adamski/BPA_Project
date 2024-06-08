@@ -2,6 +2,8 @@ from functools import partial
 from src.MQTT_Camera import MQTTClient
 from src.OPC_UA_Subscriber_AssemplyLine import OPC_UA_Subscriber
 from src.utils.Logger import SingletonLogger
+from src.utils.util_ass_response import get_response_plan
+from src.utils.util_camera_inspection_response import get_simplified_inspection_response
 
 logger = SingletonLogger()
 
@@ -22,12 +24,9 @@ class InspectionHandler:
 
     def get_inspection_response(self, inspection_plan):
         camera_response = self.mqtt_client.request_response_cv(message="Triggering Camera", timeout=2)
-
-        # TODO: Verarbeitung
-        inspection_response = camera_response
-
-        logger.info(f"<Pseudo> inspection_response: {camera_response}")
-
+        camera_response_simplified = get_simplified_inspection_response(camera_response, 0.6)
+        inspection_response = get_response_plan(inspection_plan, camera_response_simplified)
+        logger.info(f"Inspection Response: {inspection_response}")
         return inspection_response
 
     def run(self):
